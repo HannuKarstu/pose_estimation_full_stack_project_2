@@ -1,0 +1,26 @@
+FROM python:3.8.10-slim
+WORKDIR /srv
+
+ENV FLASK_APP=backend/web_app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_VERSION=1.3.1
+ENV PATH "/root/.local/bin:$PATH"
+
+RUN apt-get update -y && \
+    apt-get install -y curl ffmpeg libsm6 libxext6
+
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+
+RUN pip install --upgrade pip
+
+COPY pyproject.toml pyproject.toml
+COPY poetry.lock poetry.lock
+
+RUN poetry install --no-root
+
+COPY backend ./backend
+
+EXPOSE 8000
+ENV PYTHONUNBUFFERED=TRUE
+CMD gunicorn -w 1 -b :8000 backend.web_app:app

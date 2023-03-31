@@ -1,0 +1,38 @@
+version: "3.3"
+
+services:
+  backend:
+    image: "${REPOSITORY}/${BACKEND_NAME}:${BACKEND_TAG}"
+    container_name: "${BACKEND_NAME}"
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./files:/srv/files
+    env_file:
+      - .env
+      - my_env.env
+    environment:
+      # These overwrite the ones in .env file
+      - APP_DEBUG=False
+      - MONGODB_HOSTNAME=mongodb
+    networks:
+      - backend_network
+
+  frontend:
+    image: "${REPOSITORY}/${FRONTEND_NAME}:${FRONTEND_TAG}"
+    container_name: "${FRONTEND_NAME}"
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.prod
+    env_file: .env
+    ports:
+      - "${APP_PORT}:80"
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
+    driver: bridge
