@@ -1,0 +1,9 @@
+.vscode
+.venv
+.git
+TEMP
+**/*.pyc
+mongodbdata
+frontend/node_modules
+frontend/build
+myenv.env

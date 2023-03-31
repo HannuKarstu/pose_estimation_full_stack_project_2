@@ -1,0 +1,55 @@
+version: "3.3"
+
+services:
+  backend:
+    image: "${BACKEND_NAME}"
+    container_name: "${BACKEND_NAME}"
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./files:/srv/files
+    env_file: .env
+    environment:
+      # These overwrite the ones in .env file
+      - APP_DEBUG=True
+      - MONGODB_HOSTNAME=mongodb
+    networks:
+      - backend_network
+
+  frontend:
+    image: "${FRONTEND_NAME}"
+    container_name: "${FRONTEND_NAME}"
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    env_file: .env
+    ports:
+      - "${APP_PORT}:3000"
+    networks:
+      - backend_network
+
+  mongodb:
+    image: mongo:4.2.23
+    container_name: "${MONGODB_NAME}"
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGODB_DATABASE}
+      - MONGODB_DATA_DIR=/data/db
+      - MONDODB_LOG_DIR=/dev/null
+      - MONGODB_USERNAME=${MONGODB_USERNAME}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
+    volumes:
+      - ./mongodbdata:/data/db
+      - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
+    networks:
+      - backend_network
+    ports:
+      - 27017:27017
+
+networks:
+  backend_network:
+    driver: bridge

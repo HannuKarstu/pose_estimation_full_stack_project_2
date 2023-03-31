@@ -1,0 +1,11 @@
+.vscode
+.venv
+.git
+backend/models
+*/__pycache__
+*/*/__pycache__
+**/*.pyc
+files
+tests/temp
+mongodbdata
+my_env.env
